@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>棋棋的英语乐园</title>
+<meta name="theme-color" content="#14BF96">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="英语乐园">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Noto+Sans+SC:wght@400;600;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --teal:#14BF96;--teal-dark:#0FA67F;--navy:#0A2A66;
+    --purple:#7853AB;--purple-light:#9B78D0;
+    --orange:#F2A135;--yellow:#FFD600;
+    --coral:#EF6C57;--coral-dark:#D95843;
+    --pink:#E85D9A;--sky:#4DABF5;--white:#FFFFFF;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Noto Sans SC','ZCOOL KuaiLe',sans-serif;background:var(--teal);min-height:100vh;overflow-x:hidden;-webkit-tap-highlight-color:transparent;user-select:none}
+  .app{max-width:420px;margin:0 auto;padding:16px 16px 8px;min-height:100vh;position:relative}
+  .screen{display:none;flex-direction:column;align-items:center;gap:12px;width:100%;padding-bottom:20px}
+  .screen.active{display:flex}
+
+  /* Home */
+  .home-title{font-family:'ZCOOL KuaiLe',cursive;font-size:36px;font-weight:900;text-align:center;letter-spacing:2px;margin-top:24px}
+  .home-title span{display:inline-block;animation:titleBounce .5s ease both}
+  .home-title span:nth-child(1){color:#FFB7C5;animation-delay:0s}
+  .home-title span:nth-child(2){color:#FFDBA4;animation-delay:.04s}
+  .home-title span:nth-child(3){color:rgba(255,255,255,.5);font-size:26px;animation-delay:.08s}
+  .home-title span:nth-child(4){color:#B4F0A7;animation-delay:.1s}
+  .home-title span:nth-child(5){color:#A7D8F0;animation-delay:.14s}
+  .home-title span:nth-child(6){color:#D4AAFF;animation-delay:.18s}
+  .home-title span:nth-child(7){color:#FFE27A;animation-delay:.22s}
+  @keyframes titleBounce{0%{transform:translateY(-20px);opacity:0}60%{transform:translateY(4px)}100%{transform:translateY(0);opacity:1}}
+  .home-sub{color:rgba(255,255,255,.7);font-size:15px;font-weight:600;text-align:center;margin-bottom:8px}
+
+  /* Difficulty toggle */
+  .diff-toggle{display:flex;background:rgba(0,0,0,.1);border-radius:20px;padding:3px;gap:2px;margin-bottom:4px}
+  .diff-btn{border:none;background:none;color:rgba(255,255,255,.6);font-size:13px;font-weight:700;padding:6px 16px;border-radius:18px;cursor:pointer;font-family:inherit;transition:.2s}
+  .diff-btn.active{background:var(--white);color:var(--teal-dark)}
+
+  /* Mode cards */
+  .mode-card{width:100%;display:flex;align-items:center;gap:14px;padding:16px 18px;border:none;border-radius:20px;cursor:pointer;font-family:inherit;text-align:left;color:var(--white);transition:transform .1s;position:relative}
+  .mode-card:active{transform:translateY(3px)!important}
+  .mode-card.c-purple{background:var(--purple);box-shadow:0 5px 0 #5C3D8F}
+  .mode-card.c-orange{background:var(--orange);box-shadow:0 5px 0 #D48A20}
+  .mode-card.c-pink{background:var(--pink);box-shadow:0 5px 0 #C94980}
+  .mode-card.c-sky{background:var(--sky);box-shadow:0 5px 0 #3690D4}
+  .mode-card.c-coral{background:var(--coral);box-shadow:0 5px 0 var(--coral-dark)}
+  .mode-card:active{box-shadow:0 2px 0 rgba(0,0,0,.15)!important}
+  .mode-dot{width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;flex-shrink:0}
+  .mode-label{font-size:17px;font-weight:800}
+  .mode-desc{font-size:12px;opacity:.75;margin-top:2px}
+  .book-badge{position:absolute;right:16px;top:50%;transform:translateY(-50%);background:var(--yellow);color:var(--navy);font-size:13px;font-weight:900;border-radius:10px;padding:2px 8px;min-width:24px;text-align:center}
+  .book-badge:empty{display:none}
+
+  /* Top bar */
+  .top-bar{display:flex;justify-content:space-between;align-items:center;width:100%}
+  .back-btn{border:none;background:rgba(0,0,0,.1);color:var(--white);font-size:14px;font-weight:700;padding:8px 14px;border-radius:14px;cursor:pointer;font-family:inherit}
+  .score-badge{background:var(--yellow);color:var(--navy);font-size:14px;font-weight:900;border-radius:12px;padding:4px 12px}
+
+  /* Display area */
+  .display-area{width:100%;min-height:120px;background:var(--white);border-radius:20px;padding:20px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 0 rgba(0,0,0,.08);position:relative;overflow:hidden}
+  .display-text{font-size:52px;font-weight:900;color:var(--navy);letter-spacing:4px;text-transform:uppercase;word-break:break-all;text-align:center;line-height:1.2;font-family:'Noto Sans SC',monospace}
+  .display-text .cycling{color:var(--purple);animation:blink .5s infinite}
+  .display-text .cursor{display:inline-block;width:3px;height:48px;background:var(--purple);animation:blink .6s infinite;vertical-align:middle;margin-left:2px}
+  .display-placeholder{color:#CCC;font-size:20px;font-weight:600}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+  .display-sentence .display-text{font-size:36px;letter-spacing:2px}
+
+  /* Quiz prompt */
+  .quiz-prompt{width:100%;background:rgba(255,255,255,.15);border-radius:20px;padding:20px;text-align:center}
+  .quiz-emoji{font-size:72px;line-height:1.1}
+  .quiz-chinese{font-size:24px;font-weight:800;color:var(--white);margin-top:4px}
+  .quiz-hint{font-size:16px;color:var(--yellow);font-weight:700;margin-top:6px;min-height:22px}
+
+  /* T9 Keyboard */
+  .t9-wrap{width:100%;margin-top:4px}
+  .t9-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+  .t9-key{border:none;border-radius:14px;background:var(--white);cursor:pointer;padding:10px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;transition:transform .05s;box-shadow:0 3px 0 rgba(0,0,0,.1);min-height:60px;justify-content:center}
+  .t9-key:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.08)}
+  .t9-key.active-key{background:var(--purple);color:var(--white)}
+  .t9-key.active-key .t9-letters{color:rgba(255,255,255,.8)}
+  .t9-key.active-key .t9-num{color:rgba(255,255,255,.6)}
+  .t9-num{font-size:12px;font-weight:700;color:#999}
+  .t9-letters{font-size:16px;font-weight:800;color:var(--navy);letter-spacing:2px}
+  .t9-key.fn-key{background:rgba(0,0,0,.08);box-shadow:0 3px 0 rgba(0,0,0,.06)}
+  .t9-key.fn-key:active{background:rgba(0,0,0,.15)}
+  .t9-key.fn-key .t9-letters{color:var(--white);font-size:20px}
+
+  /* Action row */
+  .action-row{width:100%;display:flex;gap:8px;align-items:center}
+  .voice-btn{flex:1;border:none;border-radius:16px;padding:14px;font-size:28px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform .1s;background:var(--white);color:var(--navy)}
+  .voice-btn:active{transform:scale(.95)}
+  .voice-btn.recording{background:var(--coral);color:var(--white);animation:pulse 1s infinite}
+  .voice-btn .voice-label{font-size:14px;font-weight:700}
+  .voice-btn .rec-dot{display:none;width:10px;height:10px;border-radius:50%;background:#fff;animation:blink .8s infinite}
+  .voice-btn.recording .rec-dot{display:inline-block}
+  @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.03)}}
+  .save-btn{flex:1;border:none;border-radius:16px;padding:14px;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;background:var(--yellow);color:var(--navy);box-shadow:0 3px 0 #D4B200;transition:transform .1s}
+  .save-btn:active{transform:translateY(2px);box-shadow:0 1px 0 #D4B200}
+  .check-btn{flex:1;border:none;border-radius:16px;padding:14px;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;background:var(--orange);color:var(--white);box-shadow:0 3px 0 #D48A20;transition:transform .1s}
+  .check-btn:active{transform:translateY(2px);box-shadow:0 1px 0 #D48A20}
+  .hint-btn{border:none;border-radius:16px;padding:14px 20px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;background:rgba(0,0,0,.1);color:var(--white);transition:transform .1s}
+  .hint-btn:active{transform:scale(.95)}
+
+  /* Feedback */
+  .feedback{text-align:center;font-size:18px;font-weight:800;min-height:28px;display:flex;align-items:center;justify-content:center;gap:6px}
+  .feedback.correct{color:var(--yellow)}
+  .feedback.wrong{color:var(--white);animation:shake .4s}
+  .feedback.info{color:rgba(255,255,255,.7)}
+
+  /* Word book */
+  .book-list{width:100%;display:flex;flex-direction:column;gap:10px}
+  .book-item{width:100%;background:var(--white);border-radius:16px;padding:14px 16px;box-shadow:0 3px 0 rgba(0,0,0,.08);display:flex;align-items:center;gap:12px}
+  .book-word{font-size:22px;font-weight:900;color:var(--navy);text-transform:uppercase;flex:1}
+  .book-source{font-size:11px;color:#BBB;margin-top:2px}
+  .book-del{border:none;border-radius:10px;padding:6px 12px;background:rgba(0,0,0,.06);color:#BBB;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
+  .book-del:active{background:rgba(0,0,0,.12)}
+  .book-empty{text-align:center;color:rgba(255,255,255,.6);font-size:16px;margin-top:40px}
+  .book-clear{border:none;background:rgba(0,0,0,.1);color:var(--white);font-size:13px;font-weight:600;padding:8px 16px;border-radius:12px;cursor:pointer;font-family:inherit;margin-top:12px;align-self:center}
+  .book-count{color:rgba(255,255,255,.65);font-size:14px;font-weight:700}
+
+  /* Animations */
+  @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+  @keyframes pop{0%{transform:scale(.8)}50%{transform:scale(1.1)}100%{transform:scale(1)}}
+  .anim-pop{animation:pop .3s ease}
+  .confetti-layer{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:999}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- HOME -->
+  <div class="screen active" id="homeScreen">
+    <div class="home-title"><span>棋</span><span>棋</span><span>的</span><span>英</span><span>语</span><span>乐</span><span>园</span></div>
+    <div class="home-sub">说一说，拼一拼</div>
+    <div class="diff-toggle">
+      <button class="diff-btn active" data-d="easy" onclick="setDiff('easy')">简单</button>
+      <button class="diff-btn" data-d="medium" onclick="setDiff('medium')">中等</button>
+      <button class="diff-btn" data-d="hard" onclick="setDiff('hard')">困难</button>
+    </div>
+    <button class="mode-card c-purple" onclick="startSpell('word')"><div class="mode-dot">Aa</div><div><div class="mode-label">拼单词</div><div class="mode-desc">自由拼写英文单词</div></div></button>
+    <button class="mode-card c-orange" onclick="startQuiz()"><div class="mode-dot">?</div><div><div class="mode-label">单词挑战</div><div class="mode-desc">看图猜单词，拼出来</div></div></button>
+    <button class="mode-card c-pink" onclick="startSpell('sentence')"><div class="mode-dot">...</div><div><div class="mode-label">拼句子</div><div class="mode-desc">用键盘或语音拼句子</div></div></button>
+    <button class="mode-card c-sky" onclick="showBook()"><div class="mode-dot">★</div><div><div class="mode-label">单词本</div><div class="mode-desc">我认识的单词</div></div><span class="book-badge" id="bookBadge"></span></button>
+  </div>
+
+  <!-- SPELL (free input) -->
+  <div class="screen" id="spellScreen">
+    <div class="top-bar"><button class="back-btn" onclick="goHome()">← 返回</button><span class="score-badge" id="spellTitle">拼单词</span></div>
+    <div class="display-area" id="spellDisplayArea">
+      <div class="display-text" id="spellDisplay"><span class="display-placeholder">按键盘开始拼写</span></div>
+    </div>
+    <div class="feedback" id="spellFeedback"></div>
+    <div class="action-row">
+      <button class="voice-btn" id="spellVoice" onclick="voiceToggle(this)"><span>🎤</span><span class="voice-label">点击说英文</span></button>
+      <button class="save-btn" onclick="saveToBook()">记住了！</button>
+    </div>
+    <div class="t9-wrap" id="spellT9"></div>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="screen" id="quizScreen">
+    <div class="top-bar"><button class="back-btn" onclick="goHome()">← 返回</button><span class="score-badge" id="quizScoreBadge">0/0</span></div>
+    <div class="quiz-prompt">
+      <div class="quiz-emoji" id="quizEmoji"></div>
+      <div class="quiz-chinese" id="quizChinese"></div>
+      <div class="quiz-hint" id="quizHint"></div>
+    </div>
+    <div class="display-area" id="quizDisplayArea">
+      <div class="display-text" id="quizDisplay"><span class="display-placeholder">拼出这个单词</span></div>
+    </div>
+    <div class="feedback" id="quizFeedback"></div>
+    <div class="action-row">
+      <button class="voice-btn" id="quizVoice" onclick="voiceToggle(this)"><span>🎤</span><span class="voice-label">点击说英文</span></button>
+      <button class="hint-btn" onclick="showQuizHint()">提示</button>
+      <button class="check-btn" onclick="checkQuiz()">检查 ✓</button>
+    </div>
+    <div class="t9-wrap" id="quizT9"></div>
+  </div>
+
+  <!-- BOOK -->
+  <div class="screen" id="bookScreen">
+    <div class="top-bar"><button class="back-btn" onclick="goHome()">← 返回</button><span class="book-count" id="bookCount"></span></div>
+    <div class="book-list" id="bookList"></div>
+  </div>
+
+</div>
+<div class="confetti-layer" id="confettiLayer"></div>
+
+<script>
+// ==================== CONSTANTS ====================
+const T9_MAP = {
+  '2':['A','B','C'],'3':['D','E','F'],'4':['G','H','I'],
+  '5':['J','K','L'],'6':['M','N','O'],'7':['P','Q','R','S'],
+  '8':['T','U','V'],'9':['W','X','Y','Z']
+};
+
+const WORDS = [
+  // Easy (2-3 letters)
+  {en:'cat',zh:'猫',emoji:'🐱',d:'easy'},{en:'dog',zh:'狗',emoji:'🐶',d:'easy'},
+  {en:'sun',zh:'太阳',emoji:'☀️',d:'easy'},{en:'egg',zh:'蛋',emoji:'🥚',d:'easy'},
+  {en:'red',zh:'红色',emoji:'🔴',d:'easy'},{en:'bus',zh:'公交',emoji:'🚌',d:'easy'},
+  {en:'car',zh:'汽车',emoji:'🚗',d:'easy'},{en:'cup',zh:'杯子',emoji:'🥤',d:'easy'},
+  {en:'pen',zh:'笔',emoji:'🖊️',d:'easy'},{en:'box',zh:'盒子',emoji:'📦',d:'easy'},
+  {en:'ant',zh:'蚂蚁',emoji:'🐜',d:'easy'},{en:'bee',zh:'蜜蜂',emoji:'🐝',d:'easy'},
+  {en:'cow',zh:'牛',emoji:'🐮',d:'easy'},{en:'pig',zh:'猪',emoji:'🐷',d:'easy'},
+  {en:'hat',zh:'帽子',emoji:'🎩',d:'easy'},{en:'bag',zh:'包',emoji:'🎒',d:'easy'},
+  {en:'bed',zh:'床',emoji:'🛏️',d:'easy'},{en:'toy',zh:'玩具',emoji:'🧸',d:'easy'},
+  {en:'eye',zh:'眼睛',emoji:'👁️',d:'easy'},{en:'ear',zh:'耳朵',emoji:'👂',d:'easy'},
+  {en:'fox',zh:'狐狸',emoji:'🦊',d:'easy'},{en:'map',zh:'地图',emoji:'🗺️',d:'easy'},
+  {en:'bat',zh:'蝙蝠',emoji:'🦇',d:'easy'},{en:'fan',zh:'扇子',emoji:'🪭',d:'easy'},
+  // Medium (4 letters)
+  {en:'duck',zh:'鸭子',emoji:'🦆',d:'medium'},{en:'fish',zh:'鱼',emoji:'🐟',d:'medium'},
+  {en:'bear',zh:'熊',emoji:'🐻',d:'medium'},{en:'moon',zh:'月亮',emoji:'🌙',d:'medium'},
+  {en:'star',zh:'星星',emoji:'⭐',d:'medium'},{en:'tree',zh:'树',emoji:'🌳',d:'medium'},
+  {en:'cake',zh:'蛋糕',emoji:'🎂',d:'medium'},{en:'milk',zh:'牛奶',emoji:'🥛',d:'medium'},
+  {en:'rice',zh:'米饭',emoji:'🍚',d:'medium'},{en:'ball',zh:'球',emoji:'⚽',d:'medium'},
+  {en:'book',zh:'书',emoji:'📖',d:'medium'},{en:'bird',zh:'鸟',emoji:'🐦',d:'medium'},
+  {en:'frog',zh:'青蛙',emoji:'🐸',d:'medium'},{en:'hand',zh:'手',emoji:'✋',d:'medium'},
+  {en:'nose',zh:'鼻子',emoji:'👃',d:'medium'},{en:'rain',zh:'雨',emoji:'🌧️',d:'medium'},
+  {en:'snow',zh:'雪',emoji:'❄️',d:'medium'},{en:'blue',zh:'蓝色',emoji:'🔵',d:'medium'},
+  {en:'pink',zh:'粉色',emoji:'💗',d:'medium'},{en:'lion',zh:'狮子',emoji:'🦁',d:'medium'},
+  {en:'kite',zh:'风筝',emoji:'🪁',d:'medium'},{en:'door',zh:'门',emoji:'🚪',d:'medium'},
+  {en:'shoe',zh:'鞋子',emoji:'👟',d:'medium'},{en:'sock',zh:'袜子',emoji:'🧦',d:'medium'},
+  // Hard (5+ letters)
+  {en:'apple',zh:'苹果',emoji:'🍎',d:'hard'},{en:'water',zh:'水',emoji:'💧',d:'hard'},
+  {en:'bread',zh:'面包',emoji:'🍞',d:'hard'},{en:'grape',zh:'葡萄',emoji:'🍇',d:'hard'},
+  {en:'lemon',zh:'柠檬',emoji:'🍋',d:'hard'},{en:'peach',zh:'桃子',emoji:'🍑',d:'hard'},
+  {en:'green',zh:'绿色',emoji:'🟢',d:'hard'},{en:'black',zh:'黑色',emoji:'⚫',d:'hard'},
+  {en:'white',zh:'白色',emoji:'⚪',d:'hard'},{en:'house',zh:'房子',emoji:'🏠',d:'hard'},
+  {en:'horse',zh:'马',emoji:'🐴',d:'hard'},{en:'tiger',zh:'老虎',emoji:'🐯',d:'hard'},
+  {en:'snake',zh:'蛇',emoji:'🐍',d:'hard'},{en:'juice',zh:'果汁',emoji:'🧃',d:'hard'},
+  {en:'cloud',zh:'云',emoji:'☁️',d:'hard'},{en:'train',zh:'火车',emoji:'🚂',d:'hard'},
+  {en:'plane',zh:'飞机',emoji:'✈️',d:'hard'},{en:'candy',zh:'糖果',emoji:'🍬',d:'hard'},
+  {en:'happy',zh:'开心',emoji:'😊',d:'hard'},{en:'bunny',zh:'兔子',emoji:'🐰',d:'hard'},
+  {en:'flower',zh:'花',emoji:'🌸',d:'hard'},{en:'banana',zh:'香蕉',emoji:'🍌',d:'hard'},
+  {en:'orange',zh:'橙子',emoji:'🍊',d:'hard'},{en:'monkey',zh:'猴子',emoji:'🐵',d:'hard'},
+];
+
+// ==================== STATE ====================
+let difficulty = 'easy';
+let spellMode = 'word'; // 'word' | 'sentence'
+let inputText = '';
+let cyclingChar = '';
+let t9Key = null, t9Idx = 0, t9Timer = null;
+let isRecording = false, mediaRecorder = null, audioChunks = [];
+let activeTarget = 'spell'; // 'spell' | 'quiz'
+// Quiz state
+let quizWord = null, quizScore = 0, quizTotal = 0, quizWrong = 0, quizHinted = false;
+
+// ==================== SCREEN ====================
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function goHome(){cancelT9();showScreen('homeScreen');updBookBadge();}
+function setDiff(d){
+  difficulty=d;
+  document.querySelectorAll('.diff-btn').forEach(b=>b.classList.toggle('active',b.dataset.d===d));
+}
+
+// ==================== T9 KEYBOARD ====================
+function buildT9(containerId){
+  const wrap=document.getElementById(containerId);
+  let h='<div class="t9-grid">';
+  h+='<button class="t9-key fn-key" data-k="1" ontouchstart="t9Press(\'1\',event)" onmousedown="t9Press(\'1\',event)"><span class="t9-num">1</span><span class="t9-letters">. , !</span></button>';
+  for(let k=2;k<=9;k++){
+    const letters=T9_MAP[String(k)].join(' ');
+    h+=`<button class="t9-key" data-k="${k}" ontouchstart="t9Press('${k}',event)" onmousedown="t9Press('${k}',event)"><span class="t9-num">${k}</span><span class="t9-letters">${letters}</span></button>`;
+  }
+  h+='<button class="t9-key fn-key" data-k="del" ontouchstart="t9Press(\'del\',event)" onmousedown="t9Press(\'del\',event)"><span class="t9-letters">⌫</span></button>';
+  h+='<button class="t9-key fn-key" data-k="0" ontouchstart="t9Press(\'0\',event)" onmousedown="t9Press(\'0\',event)"><span class="t9-num">0</span><span class="t9-letters">␣</span></button>';
+  h+='<button class="t9-key fn-key" data-k="clr" ontouchstart="t9Press(\'clr\',event)" onmousedown="t9Press(\'clr\',event)"><span class="t9-letters">清空</span></button>';
+  h+='</div>';
+  wrap.innerHTML=h;
+}
+
+function t9Press(key, e){
+  if(e)e.preventDefault();
+  clearTimeout(t9Timer);
+  // Highlight key
+  document.querySelectorAll('.t9-key').forEach(k=>k.classList.remove('active-key'));
+
+  if(key==='del'){confirmT9();if(inputText.length>0){inputText=inputText.slice(0,-1);}renderDisplay();return;}
+  if(key==='clr'){cancelT9();inputText='';renderDisplay();return;}
+  if(key==='0'){confirmT9();inputText+=' ';renderDisplay();return;}
+  if(key==='1'){
+    const puncts=['.', ',', '!', '?', "'"];
+    if(t9Key==='1'){t9Idx=(t9Idx+1)%puncts.length;cyclingChar=puncts[t9Idx];}
+    else{confirmT9();t9Key='1';t9Idx=0;cyclingChar=puncts[0];}
+    highlightKey('1');renderDisplay();
+    t9Timer=setTimeout(()=>confirmT9(),1200);return;
+  }
+
+  const letters=T9_MAP[key];
+  if(!letters)return;
+
+  if(t9Key===key){t9Idx=(t9Idx+1)%letters.length;cyclingChar=letters[t9Idx];}
+  else{confirmT9();t9Key=key;t9Idx=0;cyclingChar=letters[0];}
+  highlightKey(key);renderDisplay();
+  t9Timer=setTimeout(()=>confirmT9(),1000);
+}
+
+function confirmT9(){
+  clearTimeout(t9Timer);
+  if(cyclingChar){inputText+=cyclingChar;cyclingChar='';}
+  t9Key=null;t9Idx=0;
+  document.querySelectorAll('.t9-key').forEach(k=>k.classList.remove('active-key'));
+  renderDisplay();
+}
+function cancelT9(){clearTimeout(t9Timer);cyclingChar='';t9Key=null;t9Idx=0;document.querySelectorAll('.t9-key').forEach(k=>k.classList.remove('active-key'));}
+function highlightKey(k){document.querySelectorAll('.t9-key').forEach(btn=>{btn.classList.toggle('active-key',btn.dataset.k===k)});}
+
+function renderDisplay(){
+  const isSpell = activeTarget==='spell';
+  const el = document.getElementById(isSpell?'spellDisplay':'quizDisplay');
+  const full = inputText + cyclingChar;
+  if(!full){el.innerHTML='<span class="display-placeholder">'+(isSpell?(spellMode==='word'?'按键盘开始拼写':'拼一个句子吧'):'拼出这个单词')+'</span>';return;}
+  let h='';
+  for(let i=0;i<inputText.length;i++) h+=`<span>${inputText[i]}</span>`;
+  if(cyclingChar) h+=`<span class="cycling">${cyclingChar}</span>`;
+  h+='<span class="cursor"></span>';
+  el.innerHTML=h;
+}
+
+// ==================== VOICE ====================
+let voiceRec=null, voiceBtn=null, recTimer=null, recSec=0;
+const hasWebSpeech=('webkitSpeechRecognition' in window)||('SpeechRecognition' in window);
+
+function voiceToggle(btn){
+  voiceBtn=btn;
+  if(isRecording){voiceStopAll();return;}
+  isRecording=true;
+  const fbId=activeTarget==='spell'?'spellFeedback':'quizFeedback';
+  btn.classList.add('recording');
+  recSec=0;
+  btn.querySelector('.voice-label').textContent='正在听... 0s';
+  recTimer=setInterval(()=>{recSec++;btn.querySelector('.voice-label').textContent='正在听... '+recSec+'s';if(recSec>=10)voiceStopAll();},1000);
+
+  if(hasWebSpeech){
+    // Prefer Web Speech API: real-time, low latency, stable
+    const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+    voiceRec=new SR();voiceRec.lang='en-US';voiceRec.continuous=false;voiceRec.interimResults=true;
+    voiceRec.onresult=e=>{
+      let final='',interim='';
+      for(let i=0;i<e.results.length;i++){
+        if(e.results[i].isFinal)final+=e.results[i][0].transcript;
+        else interim+=e.results[i][0].transcript;
+      }
+      const text=(final||interim).toLowerCase().trim();
+      if(text){confirmT9();inputText=text;renderDisplay();showFB(fbId,'');}
+    };
+    voiceRec.onend=()=>{voiceResetBtn();};
+    voiceRec.onerror=e=>{
+      voiceResetBtn();
+      if(e.error==='not-allowed')showFB(fbId,'需要麦克风权限','info');
+      else if(e.error!=='aborted')startDashScopeRecording(fbId);
+    };
+    voiceRec.start();
+    showFB(fbId,'说英文单词...','info');
+  }else{
+    startDashScopeRecording(fbId);
+  }
+}
+
+function startDashScopeRecording(fbId){
+  audioChunks=[];
+  navigator.mediaDevices.getUserMedia({audio:{sampleRate:16000,channelCount:1}}).then(stream=>{
+    mediaRecorder=new MediaRecorder(stream);
+    mediaRecorder.ondataavailable=ev=>{audioChunks.push(ev.data);};
+    mediaRecorder.onstop=()=>{
+      stream.getTracks().forEach(t=>t.stop());
+      if(audioChunks.length>0){
+        const blob=new Blob(audioChunks,{type:mediaRecorder.mimeType});
+        processDashScope(blob,fbId);
+      }
+    };
+    mediaRecorder.start();
+    showFB(fbId,'说完后点击停止','info');
+  }).catch(()=>{voiceResetBtn();showFB(fbId,'需要麦克风权限','info');});
+}
+
+function voiceStopAll(){
+  clearInterval(recTimer);
+  isRecording=false;
+  if(voiceRec){try{voiceRec.stop();}catch(e){}voiceRec=null;}
+  if(mediaRecorder&&mediaRecorder.state==='recording'){mediaRecorder.stop();}
+  voiceResetBtn();
+}
+function voiceResetBtn(){
+  clearInterval(recTimer);isRecording=false;
+  document.querySelectorAll('.voice-btn').forEach(b=>{b.classList.remove('recording');b.querySelector('.voice-label').textContent='点击说英文';});
+}
+
+async function processDashScope(blob,fbId){
+  showFB(fbId,'识别中...','info');
+  try{
+    const reader=new FileReader();
+    const base64=await new Promise((resolve,reject)=>{reader.onloadend=()=>resolve(reader.result.split(',')[1]);reader.onerror=reject;reader.readAsDataURL(blob);});
+    const fmt=blob.type.includes('mp4')?'mp4':blob.type.includes('wav')?'wav':'webm';
+    const res=await fetch('/api/asr',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({audio:base64,format:fmt})});
+    if(res.ok){
+      const data=await res.json();
+      const text=extractASRText(data);
+      if(text){confirmT9();inputText=text.toLowerCase().replace(/[^a-z\s.,!?']/g,'');renderDisplay();showFB(fbId,'');return;}
+    }
+    showFB(fbId,'没听清，再试一次','wrong');
+  }catch(e){showFB(fbId,'识别失败，请重试','wrong');}
+}
+function extractASRText(data){
+  if(data.text)return data.text;
+  if(data.choices&&data.choices[0]&&data.choices[0].message)return data.choices[0].message.content;
+  if(data.output&&data.output.text)return data.output.text;
+  return null;
+}
+
+// ==================== SPELL MODE ====================
+function startSpell(mode){
+  spellMode=mode;activeTarget='spell';inputText='';cyclingChar='';cancelT9();
+  document.getElementById('spellTitle').textContent=mode==='word'?'拼单词':'拼句子';
+  document.getElementById('spellDisplayArea').classList.toggle('display-sentence',mode==='sentence');
+  renderDisplay();clearFB('spellFeedback');buildT9('spellT9');showScreen('spellScreen');
+}
+function saveToBook(){
+  confirmT9();
+  const word=inputText.trim().toLowerCase();
+  if(!word){showFB('spellFeedback','先拼一个单词吧','info');return;}
+  const book=getBook();
+  if(book.find(w=>w.word===word)){showFB('spellFeedback','已经在单词本里了','info');return;}
+  book.unshift({word,ts:Date.now(),source:'free'});
+  if(book.length>500)book.length=500;
+  saveBookData(book);
+  speak(word);
+  showFB('spellFeedback','已收入单词本 ★','correct');
+  showConfetti();
+  inputText='';cyclingChar='';cancelT9();
+  setTimeout(()=>{renderDisplay();clearFB('spellFeedback');},1500);
+}
+
+// ==================== QUIZ MODE ====================
+function startQuiz(){
+  activeTarget='quiz';quizScore=0;quizTotal=0;quizWrong=0;quizHinted=false;
+  inputText='';cyclingChar='';cancelT9();
+  updQuizScore();buildT9('quizT9');nextQuiz();showScreen('quizScreen');
+}
+function nextQuiz(){
+  inputText='';cyclingChar='';cancelT9();quizWrong=0;quizHinted=false;clearFB('quizFeedback');
+  const pool=WORDS.filter(w=>{
+    if(difficulty==='easy')return w.d==='easy';
+    if(difficulty==='medium')return w.d==='easy'||w.d==='medium';
+    return true;
+  });
+  quizWord=pool[Math.floor(Math.random()*pool.length)];
+  document.getElementById('quizEmoji').textContent=quizWord.emoji;
+  document.getElementById('quizChinese').textContent=quizWord.zh;
+  document.getElementById('quizHint').textContent='';
+  renderDisplay();
+}
+function checkQuiz(){
+  confirmT9();
+  const answer=inputText.trim().toLowerCase();
+  if(!answer){showFB('quizFeedback','先拼出来再检查','info');return;}
+  if(answer===quizWord.en){
+    quizScore++;quizTotal++;updQuizScore();
+    showFB('quizFeedback','正确 !','correct');
+    speak(quizWord.en);showConfetti();
+    // Auto save to book
+    const book=getBook();
+    if(!book.find(w=>w.word===quizWord.en)){book.unshift({word:quizWord.en,ts:Date.now(),source:'quiz'});saveBookData(book);}
+    setTimeout(()=>nextQuiz(),1800);
+  }else{
+    quizWrong++;
+    if(quizWrong>=3){
+      quizTotal++;updQuizScore();
+      showFB('quizFeedback','答案是：'+quizWord.en.toUpperCase(),'wrong');
+      speak(quizWord.en);
+      setTimeout(()=>nextQuiz(),2500);
+    }else{
+      showFB('quizFeedback','再试试 ('+quizWrong+'/3)','wrong');
+      document.getElementById('quizDisplayArea').classList.add('anim-pop');
+      setTimeout(()=>document.getElementById('quizDisplayArea').classList.remove('anim-pop'),400);
+    }
+  }
+}
+function showQuizHint(){
+  if(!quizWord)return;
+  quizHinted=true;
+  const hint=quizWord.en[0].toUpperCase()+'_'.repeat(quizWord.en.length-1);
+  document.getElementById('quizHint').textContent='提示：'+hint+' ('+quizWord.en.length+'个字母)';
+}
+function updQuizScore(){document.getElementById('quizScoreBadge').textContent=quizScore+'/'+quizTotal;}
+
+// ==================== WORD BOOK ====================
+function getBook(){try{return JSON.parse(localStorage.getItem('qiqi_eng_book')||'[]')}catch(e){return[];}}
+function saveBookData(list){localStorage.setItem('qiqi_eng_book',JSON.stringify(list));}
+function updBookBadge(){const n=getBook().length;const b=document.getElementById('bookBadge');if(b)b.textContent=n>0?n:'';}
+function showBook(){
+  showScreen('bookScreen');
+  const book=getBook(),el=document.getElementById('bookList'),cnt=document.getElementById('bookCount');
+  cnt.textContent=book.length>0?'共 '+book.length+' 个单词':'';
+  if(!book.length){el.innerHTML='<div class="book-empty">还没有认识的单词哦</div>';return;}
+  let h='';
+  book.forEach((w,i)=>{
+    h+=`<div class="book-item"><div><div class="book-word">${w.word}</div><div class="book-source">${w.source==='quiz'?'挑战模式':'自由拼写'}</div></div><button class="book-del" onclick="delBook(${i})">删除</button></div>`;
+  });
+  h+='<button class="book-clear" onclick="clearBook()">清空单词本</button>';
+  el.innerHTML=h;
+}
+function delBook(i){const book=getBook();book.splice(i,1);saveBookData(book);showBook();}
+function clearBook(){saveBookData([]);showBook();}
+
+// ==================== SPEECH SYNTHESIS ====================
+function speak(text){
+  if(!('speechSynthesis' in window))return;
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang='en-US';u.rate=0.75;u.pitch=1.1;
+  speechSynthesis.speak(u);
+}
+
+// ==================== FEEDBACK & EFFECTS ====================
+function showFB(id,msg,cls){const el=document.getElementById(id);el.textContent=msg;el.className='feedback'+(cls?' '+cls:'');}
+function clearFB(id){const el=document.getElementById(id);el.textContent='';el.className='feedback';}
+function showConfetti(){
+  const layer=document.getElementById('confettiLayer');
+  const colors=['#FFB7C5','#FFDBA4','#B4F0A7','#A7D8F0','#D4AAFF','#FFE27A','#FF8FAB','#8BC7F7'];
+  let h='';
+  for(let i=0;i<40;i++){
+    const c=colors[Math.floor(Math.random()*colors.length)];
+    const x=Math.random()*100,d=Math.random()*2+1,del=Math.random()*.5;
+    const sz=Math.random()*8+4;
+    h+=`<div style="position:absolute;left:${x}%;top:-10px;width:${sz}px;height:${sz}px;background:${c};border-radius:${Math.random()>.5?'50%':'2px'};animation:confettiFall ${d}s ${del}s ease-in forwards"></div>`;
+  }
+  layer.innerHTML=h;
+  setTimeout(()=>layer.innerHTML='',3000);
+}
+
+// ==================== INIT ====================
+document.addEventListener('DOMContentLoaded',()=>{
+  updBookBadge();
+  // Prevent double-tap zoom
+  document.addEventListener('touchend',e=>{e.preventDefault();e.target.click();},{passive:false});
+});
+if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js');}
+
+// Add confetti animation
+const style=document.createElement('style');
+style.textContent='@keyframes confettiFall{0%{transform:translateY(0) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}';
+document.head.appendChild(style);
+</script>
+</body>
+</html>
