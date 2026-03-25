@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>棋棋的数学乐园</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#14BF96">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="数学乐园">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Noto+Sans+SC:wght@400;600;800;900&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --teal:#14BF96;--teal-dark:#0FA67F;--navy:#0A2A66;
+    --purple:#7853AB;--purple-light:#9B78D0;
+    --orange:#F2A135;--yellow:#FFD600;
+    --coral:#EF6C57;--coral-dark:#D95843;
+    --pink:#E85D9A;--sky:#4DABF5;--white:#FFFFFF;
+    --shadow:0 4px 0 rgba(0,0,0,0.12);
+    --ball-a:#FF8FAB;--ball-b:#8BC7F7;
+  }
+  body{
+    font-family:'Noto Sans SC',sans-serif;
+    background:var(--teal);min-height:100dvh;
+    display:flex;align-items:center;justify-content:center;
+    overflow-y:auto;color:var(--navy);
+    -webkit-user-select:none;user-select:none;
+    -webkit-tap-highlight-color:transparent;
+  }
+  body::before{content:'';position:fixed;inset:0;background:radial-gradient(circle at 20% 30%,rgba(255,255,255,.08) 0%,transparent 50%),radial-gradient(circle at 80% 70%,rgba(255,255,255,.06) 0%,transparent 40%);pointer-events:none;z-index:0}
+  .bg-dots{position:fixed;inset:0;pointer-events:none;z-index:0;background-image:radial-gradient(rgba(255,255,255,.1) 2px,transparent 2px);background-size:32px 32px}
+
+  .container{position:relative;z-index:1;width:100%;max-width:440px;padding:20px 20px 32px;display:flex;flex-direction:column;align-items:center}
+  .screen{display:none;width:100%;flex-direction:column;align-items:center}
+  .screen.active{display:flex;animation:popIn .4s ease}
+  @keyframes popIn{from{opacity:0;transform:scale(.95) translateY(16px)}to{opacity:1;transform:scale(1) translateY(0)}}
+
+  /* ===== Home Title ===== */
+  .home-title{font-family:'ZCOOL KuaiLe',cursive;font-size:50px;letter-spacing:3px;margin-bottom:4px;display:flex;align-items:baseline;gap:1px;filter:drop-shadow(0 3px 0 rgba(0,0,0,.1))}
+  .home-title span{display:inline-block;animation:letterDrop .4s ease both}
+  .home-title span:nth-child(1){color:#FFB7C5;animation-delay:0s}
+  .home-title span:nth-child(2){color:#FFDBA4;animation-delay:.04s}
+  .home-title span:nth-child(3){color:rgba(255,255,255,.5);font-size:26px;animation-delay:.08s}
+  .home-title span:nth-child(4){color:#B4F0A7;animation-delay:.1s}
+  .home-title span:nth-child(5){color:#A7D8F0;animation-delay:.14s}
+  .home-title span:nth-child(6){color:#D4AAFF;animation-delay:.18s}
+  .home-title span:nth-child(7){color:#FFE27A;animation-delay:.22s}
+  @keyframes letterDrop{0%{opacity:0;transform:translateY(-20px) rotate(-8deg)}70%{transform:translateY(3px) rotate(2deg)}100%{opacity:1;transform:translateY(0) rotate(0)}}
+  .home-sub{font-size:14px;color:rgba(255,255,255,.65);margin-bottom:28px;letter-spacing:3px}
+
+  /* ===== Pills ===== */
+  .pill-row{display:flex;align-items:center;gap:6px;margin-bottom:22px;background:rgba(0,0,0,.1);border-radius:28px;padding:4px}
+  .pill-item{background:none;border:none;padding:7px 14px;cursor:pointer;font-family:inherit;border-radius:24px;transition:all .25s}
+  .pill-item .pill-text{font-size:14px;font-weight:700;color:rgba(255,255,255,.55);transition:color .25s;white-space:nowrap}
+  .pill-item.selected{background:var(--white);box-shadow:0 2px 8px rgba(0,0,0,.1)}
+  .pill-item.selected .pill-text{color:var(--teal-dark)}
+  .pill-item:active{transform:scale(.95)}
+
+  /* ===== Mode Cards ===== */
+  .mode-card{width:100%;padding:18px 22px;border:none;border-radius:18px;margin-bottom:11px;cursor:pointer;display:flex;align-items:center;gap:14px;text-align:left;transition:transform .15s}
+  .mode-card:active{transform:scale(.97) translateY(2px)}
+  .mode-card.c-purple{background:var(--purple);box-shadow:0 5px 0 #5C3D8A}
+  .mode-card.c-orange{background:var(--orange);box-shadow:0 5px 0 #C87A16}
+  .mode-card.c-pink{background:var(--pink);box-shadow:0 5px 0 #C44A7E}
+  .mode-card.c-sky{background:var(--sky);box-shadow:0 5px 0 #3690D4}
+  .mode-card.c-coral{background:var(--coral);box-shadow:0 5px 0 var(--coral-dark);position:relative}
+  .mode-card:active{box-shadow:0 2px 0 rgba(0,0,0,.15)!important}
+  .mode-dot{width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;flex-shrink:0;color:var(--white);background:rgba(255,255,255,.2)}
+  .mode-label{font-size:20px;font-weight:800;color:var(--white);line-height:1.2}
+  .mode-desc{font-size:12px;color:rgba(255,255,255,.7);margin-top:1px}
+
+  .section-label{font-size:12px;font-weight:700;color:rgba(255,255,255,.4);letter-spacing:4px;margin:8px 0 8px;text-transform:uppercase}
+
+  /* ===== Top Bar ===== */
+  .top-bar{width:100%;display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+  .back-btn{font-size:14px;padding:8px 16px;background:rgba(0,0,0,.12);border:none;border-radius:12px;cursor:pointer;color:var(--white);font-weight:700;font-family:inherit;transition:transform .15s}
+  .back-btn:active{transform:scale(.93)}
+  .score-badge{font-size:16px;padding:8px 16px;background:var(--white);border-radius:12px;font-weight:800;box-shadow:var(--shadow);display:flex;align-items:center;gap:4px}
+  .badge-score{color:var(--teal-dark)}.badge-sep{color:#CCC;font-weight:400}.badge-total{color:#AAA}
+
+  /* ===== Feedback ===== */
+  .feedback{height:36px;font-size:20px;font-weight:800;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:6px}
+  .feedback.correct{color:var(--yellow);filter:drop-shadow(0 1px 2px rgba(0,0,0,.15))}
+  .feedback.wrong{color:var(--white);opacity:.85}
+  .feedback.answer{color:var(--yellow);font-size:18px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.15))}
+
+  /* ===== Math: Equation ===== */
+  .equation-area{width:100%;background:var(--white);border-radius:24px;padding:32px 20px 24px;box-shadow:0 6px 0 rgba(0,0,0,.08);margin-bottom:12px;min-height:130px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative}
+  .equation{display:flex;align-items:center;justify-content:center;gap:10px;font-size:56px;font-weight:900;color:var(--navy);line-height:1}
+  .eq-part{min-width:34px;text-align:center}
+  .eq-op{color:var(--purple);font-size:44px;font-weight:800}
+  .eq-equal{color:#CCC;font-size:44px;font-weight:800}
+  .eq-blank{min-width:66px;height:72px;border-radius:16px;background:#F0EBFF;border:3px dashed var(--purple-light);display:flex;align-items:center;justify-content:center;font-size:56px;font-weight:900;color:var(--purple);transition:all .2s;padding:0 8px}
+  .eq-blank.has-input{border-style:solid;border-color:var(--purple);background:#EAE0FF;color:var(--navy)}
+  .eq-blank.correct-highlight{border-color:var(--teal);background:#D4F7EC;color:var(--teal-dark)}
+  .eq-blank.wrong-highlight{border-color:var(--coral);background:#FEECE8;color:var(--coral)}
+
+  /* ===== Numpad ===== */
+  .numpad{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;width:100%}
+  .num-btn{aspect-ratio:1;border:none;border-radius:16px;font-size:28px;font-weight:800;font-family:inherit;cursor:pointer;transition:transform .1s;background:var(--white);color:var(--navy);box-shadow:0 4px 0 rgba(0,0,0,.1);display:flex;align-items:center;justify-content:center}
+  .num-btn:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.08)}
+  .num-btn.action-delete{background:var(--coral);color:var(--white);font-size:20px;box-shadow:0 4px 0 var(--coral-dark)}
+  .num-btn.action-confirm{background:var(--purple);color:var(--white);font-size:24px;box-shadow:0 4px 0 #5C3D8A}
+  .num-btn.action-next{background:var(--teal);color:var(--white);font-size:24px;box-shadow:0 4px 0 var(--teal-dark)}
+  .num-btn.disabled{opacity:.35;pointer-events:none}
+
+  /* ===== Pattern ===== */
+  .pattern-area{width:100%;background:var(--white);border-radius:24px;padding:20px 14px;box-shadow:0 6px 0 rgba(0,0,0,.08);margin-bottom:12px;position:relative}
+  .pattern-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+  .p-cell{aspect-ratio:1;border-radius:14px;background:#F4F1FB;display:flex;align-items:center;justify-content:center;font-size:32px;transition:all .2s}
+  .p-cell svg{width:65%;height:65%}
+  .p-cell.blank{background:#F0EBFF;border:3px dashed var(--purple-light)}
+  .p-cell.blank .blank-q{font-size:24px;font-weight:800;color:var(--purple-light)}
+  .p-cell.active{border-color:var(--purple);background:#EAE0FF;animation:pulse 1s ease infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(120,83,171,.3)}50%{box-shadow:0 0 0 6px rgba(120,83,171,.1)}}
+  .p-cell.filled-correct{border:3px solid var(--teal);background:#D4F7EC}
+  .pattern-opts{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;width:100%}
+  .p-opt{aspect-ratio:1;border:none;border-radius:16px;background:var(--white);box-shadow:0 4px 0 rgba(0,0,0,.1);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:32px;transition:transform .1s}
+  .p-opt svg{width:55%;height:55%}
+  .p-opt:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.08)}
+  .p-opt.disabled{opacity:.3;pointer-events:none}
+
+  /* ===== Triangle / 分合式 ===== */
+  .tri-wrap{width:100%;background:var(--white);border-radius:24px;padding:28px 20px 24px;box-shadow:0 6px 0 rgba(0,0,0,.08);margin-bottom:12px;display:flex;flex-direction:column;align-items:center;position:relative}
+  .tri{display:flex;flex-direction:column;align-items:center}
+  .tri-cell{min-width:80px;min-height:68px;background:#F4F1FB;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 12px;transition:all .2s}
+  .tri-cell.blank{background:#F0EBFF;border:3px dashed var(--purple-light)}
+  .tri-cell.blank.has-input{border-style:solid;border-color:var(--purple);background:#EAE0FF}
+  .tri-cell.correct-highlight{border:3px solid var(--teal)!important;background:#D4F7EC!important}
+  .tri-cell.wrong-highlight{border:3px solid var(--coral)!important;background:#FEECE8!important}
+  .tri-num{font-size:36px;font-weight:900;color:var(--navy);line-height:1}
+  .tri-num.chinese{font-family:'ZCOOL KuaiLe',cursive;font-size:32px}
+  .tri-connector{width:180px;height:40px;margin:4px 0}
+  .tri-bottom{display:flex;align-items:center;gap:10px}
+  .tri-plus{font-size:28px;font-weight:900;color:var(--purple-light)}
+
+  /* Balls */
+  .balls{display:flex;flex-wrap:wrap;justify-content:center;gap:5px;max-width:110px;margin-top:4px}
+  .ball{width:18px;height:18px;border-radius:50%;display:block}
+
+  /* Explore: number selector */
+  .num-select{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;width:100%;margin-bottom:16px}
+  .ns-btn{aspect-ratio:1;border:none;border-radius:14px;font-size:22px;font-weight:800;font-family:inherit;cursor:pointer;background:rgba(255,255,255,.15);color:var(--white);transition:all .15s;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 0 rgba(0,0,0,.08)}
+  .ns-btn:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.05)}
+  .ns-btn.ns-active{background:var(--white);color:var(--teal-dark);box-shadow:0 3px 0 rgba(0,0,0,.1)}
+
+  /* Explore nav */
+  .explore-nav{display:flex;align-items:center;gap:16px;margin-top:8px}
+  .nav-btn{width:44px;height:44px;border:none;border-radius:50%;background:rgba(0,0,0,.1);color:var(--white);font-size:20px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .1s}
+  .nav-btn:active{transform:scale(.9)}
+  .nav-btn.disabled{opacity:.3;pointer-events:none}
+  .nav-label{color:rgba(255,255,255,.7);font-size:14px;font-weight:600;min-width:60px;text-align:center}
+
+  /* ===== Wrong Answers ===== */
+  .wrong-badge{position:absolute;right:16px;top:50%;transform:translateY(-50%);background:var(--yellow);color:var(--navy);font-size:13px;font-weight:900;border-radius:10px;padding:2px 8px;min-width:24px;text-align:center}
+  .wrong-badge:empty{display:none}
+  .wrong-list{width:100%;display:flex;flex-direction:column;gap:10px}
+  .wrong-item{width:100%;background:var(--white);border-radius:16px;padding:14px 16px;box-shadow:0 3px 0 rgba(0,0,0,.08);display:flex;align-items:center;gap:10px}
+  .wrong-info{flex:1;min-width:0}
+  .wrong-q{font-size:18px;font-weight:800;color:var(--navy);line-height:1.3}
+  .wrong-meta{font-size:11px;color:#AAA;margin-top:2px}
+  .wrong-retry{border:none;border-radius:12px;padding:8px 16px;background:var(--purple);color:var(--white);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0;transition:transform .1s}
+  .wrong-retry:active{transform:scale(.93)}
+  .wrong-empty{text-align:center;color:rgba(255,255,255,.6);font-size:16px;margin-top:40px}
+  .wrong-clear{border:none;background:rgba(0,0,0,.1);color:var(--white);font-size:13px;font-weight:600;padding:8px 16px;border-radius:12px;cursor:pointer;font-family:inherit;margin-top:16px;align-self:center}
+  .wrong-clear:active{transform:scale(.95)}
+
+  /* ===== Animations ===== */
+  @keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.05)}100%{transform:scale(1)}}
+  @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+  .anim-pop{animation:pop .35s ease}.anim-shake{animation:shake .4s ease}
+  .confetti-layer{position:fixed;inset:0;pointer-events:none;z-index:999;overflow:hidden}
+  .confetti-piece{position:absolute;opacity:0;animation:confettiFall linear forwards}
+  @keyframes confettiFall{0%{opacity:1;top:-5%;transform:rotate(0) translateX(0)}100%{opacity:0;top:105%;transform:rotate(var(--rot)) translateX(var(--drift))}}
+  .stars{position:absolute;top:-8px;left:50%;transform:translateX(-50%);display:flex;gap:2px;pointer-events:none}
+  .star-item{font-size:24px;color:var(--yellow);filter:drop-shadow(0 2px 2px rgba(0,0,0,.15));animation:starPop .5s ease both}
+  .star-item:nth-child(2){animation-delay:.1s}.star-item:nth-child(3){animation-delay:.2s}
+  @keyframes starPop{0%{opacity:0;transform:scale(0) translateY(8px)}60%{transform:scale(1.4) translateY(-10px)}100%{opacity:1;transform:scale(1) translateY(-14px)}}
+
+  @media(max-height:720px){
+    .home-title{font-size:38px}.equation{font-size:46px}
+    .eq-blank{height:58px;min-width:52px;font-size:46px}
+    .num-btn{font-size:24px}.tri-num{font-size:30px}
+    .tri-cell{min-width:68px;min-height:58px}
+  }
+</style>
+</head>
+<body>
+<div class="bg-dots"></div>
+<div class="container">
+
+  <!-- ========== HOME ========== -->
+  <div class="screen active" id="homeScreen">
+    <div class="home-title"><span>棋</span><span>棋</span><span>的</span><span>数</span><span>学</span><span>乐</span><span>园</span></div>
+    <div class="home-sub">有规律，有乐趣</div>
+
+    <div class="pill-row" id="diffPills">
+      <button class="pill-item selected" onclick="setDiff('easy',this)"><div class="pill-text">简单</div></button>
+      <button class="pill-item" onclick="setDiff('medium',this)"><div class="pill-text">中等</div></button>
+      <button class="pill-item" onclick="setDiff('hard',this)"><div class="pill-text">困难</div></button>
+    </div>
+
+    <button class="mode-card c-purple" onclick="startMath('basic')"><div class="mode-dot">=</div><div><div class="mode-label">算一算</div><div class="mode-desc">算出等号后面的答案</div></div></button>
+    <button class="mode-card c-orange" onclick="startMath('missing')"><div class="mode-dot">?</div><div><div class="mode-label">猜一猜</div><div class="mode-desc">找出等式中缺少的数字</div></div></button>
+    <button class="mode-card c-pink" onclick="startPattern()"><div class="mode-dot">◆</div><div><div class="mode-label">找规律</div><div class="mode-desc">发现隐藏的排列规律</div></div></button>
+    <button class="mode-card c-sky" onclick="showScreen('decompMenu')"><div class="mode-dot">⇅</div><div><div class="mode-label">分合式</div><div class="mode-desc">探索数字的分与合</div></div></button>
+    <button class="mode-card c-coral" onclick="showWrongList()"><div class="mode-dot">✎</div><div><div class="mode-label">错题本</div><div class="mode-desc">复习做错的题目</div></div><span class="wrong-badge" id="wrongBadge"></span></button>
+  </div>
+
+  <!-- ========== DECOMP MENU ========== -->
+  <div class="screen" id="decompMenu">
+    <div class="top-bar"><button class="back-btn" onclick="goHome()">← 返回</button></div>
+    <div class="section-label" style="margin-bottom:10px">显 示 方 式</div>
+    <div class="pill-row" id="displayPills">
+      <button class="pill-item selected" onclick="setDisp('digit',this)"><div class="pill-text">数字</div></button>
+      <button class="pill-item" onclick="setDisp('balls',this)"><div class="pill-text">小球</div></button>
+      <button class="pill-item" onclick="setDisp('chinese',this)"><div class="pill-text">中文</div></button>
+      <button class="pill-item" onclick="setDisp('mixed',this)"><div class="pill-text">混合</div></button>
+    </div>
+
+    <button class="mode-card c-sky" onclick="startExplore()"><div class="mode-dot">⤵</div><div><div class="mode-label">分一分</div><div class="mode-desc">选一个数，看它怎么拆开</div></div></button>
+    <button class="mode-card c-purple" onclick="startDecomp('guessPart')"><div class="mode-dot">?</div><div><div class="mode-label">猜部分</div><div class="mode-desc">已知总数和一部分，猜另一个</div></div></button>
+    <button class="mode-card c-orange" onclick="startDecomp('guessSum')"><div class="mode-dot">+</div><div><div class="mode-label">猜总数</div><div class="mode-desc">已知两部分，猜合起来是多少</div></div></button>
+  </div>
+
+  <!-- ========== DECOMP EXPLORE ========== -->
+  <div class="screen" id="exploreScreen">
+    <div class="top-bar"><button class="back-btn" onclick="showScreen('decompMenu')">← 返回</button></div>
+    <div class="num-select" id="numSelect"></div>
+    <div class="tri-wrap" id="exploreTri" style="display:none"></div>
+    <div class="explore-nav" id="exploreNav" style="display:none">
+      <button class="nav-btn" onclick="expPrev()">‹</button>
+      <span class="nav-label" id="expLabel"></span>
+      <button class="nav-btn" onclick="expNext()">›</button>
+    </div>
+  </div>
+
+  <!-- ========== DECOMP GAME ========== -->
+  <div class="screen" id="decompGame">
+    <div class="top-bar">
+      <button class="back-btn" onclick="showScreen('decompMenu')">← 返回</button>
+      <div class="score-badge"><span class="badge-score" id="dScoreNum">0</span><span class="badge-sep">/</span><span class="badge-total" id="dTotalNum">0</span></div>
+    </div>
+    <div class="tri-wrap" id="decompTri"></div>
+    <div class="feedback" id="dFeedback"></div>
+    <div class="numpad" id="dNumpad"></div>
+  </div>
+
+  <!-- ========== MATH GAME ========== -->
+  <div class="screen" id="mathScreen">
+    <div class="top-bar">
+      <button class="back-btn" onclick="goHome()">← 返回</button>
+      <div class="score-badge"><span class="badge-score" id="mScoreNum">0</span><span class="badge-sep">/</span><span class="badge-total" id="mTotalNum">0</span></div>
+    </div>
+    <div class="equation-area" id="equationArea"><div class="equation" id="equation"></div></div>
+    <div class="feedback" id="mFeedback"></div>
+    <div class="numpad" id="mNumpad"></div>
+  </div>
+
+  <!-- ========== PATTERN GAME ========== -->
+  <div class="screen" id="patternScreen">
+    <div class="top-bar">
+      <button class="back-btn" onclick="goHome()">← 返回</button>
+      <div class="score-badge"><span class="badge-score" id="pScoreNum">0</span><span class="badge-sep">/</span><span class="badge-total" id="pTotalNum">0</span></div>
+    </div>
+    <div class="pattern-area" id="patternArea"><div class="pattern-grid" id="patternGrid"></div></div>
+    <div class="feedback" id="pFeedback"></div>
+    <div class="pattern-opts" id="patternOpts"></div>
+  </div>
+
+  <!-- ========== WRONG ANSWERS ========== -->
+  <div class="screen" id="wrongScreen">
+    <div class="top-bar"><button class="back-btn" onclick="goHome()">← 返回</button><span style="color:rgba(255,255,255,.65);font-size:14px;font-weight:700" id="wrongCount"></span></div>
+    <div class="wrong-list" id="wrongList"></div>
+  </div>
+
+</div>
+<div class="confetti-layer" id="confettiLayer"></div>
+
+<script>
+// ==================== SHARED ====================
+let difficulty = 'easy';
+let displayType = 'digit';
+
+function showScreen(id) { document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+function goHome() { retryMode=false;retryId=null;showScreen('homeScreen'); }
+function setDiff(d,el) { difficulty=d; document.querySelectorAll('#diffPills .pill-item').forEach(b=>b.classList.remove('selected')); el.classList.add('selected'); }
+function setDisp(d,el) { displayType=d; document.querySelectorAll('#displayPills .pill-item').forEach(b=>b.classList.remove('selected')); el.classList.add('selected'); }
+function ri(a,b) { return Math.floor(Math.random()*(b-a+1))+a; }
+function shuffle(a) { for(let i=a.length-1;i>0;i--){const j=ri(0,i);[a[i],a[j]]=[a[j],a[i]];} return a; }
+function clearFB(id) { const f=document.getElementById(id);f.textContent='';f.className='feedback'; }
+function maxNum() { return difficulty==='easy'?10:difficulty==='medium'?15:20; }
+
+function toChinese(n) {
+  const d=['零','一','二','三','四','五','六','七','八','九','十'];
+  if(n<=10) return d[n];
+  if(n<20) return '十'+d[n-10];
+  if(n===20) return '二十';
+  return String(n);
+}
+
+function renderNumVal(n, dt, colorA, colorB, splitAt) {
+  let t = dt;
+  if(t==='mixed') t=['digit','balls','chinese'][ri(0,2)];
+  if(t==='digit') return `<span class="tri-num">${n}</span>`;
+  if(t==='chinese') return `<span class="tri-num chinese">${toChinese(n)}</span>`;
+  if(t==='balls') {
+    let h='<div class="balls">';
+    const cA=colorA||'var(--ball-a)', cB=colorB||'var(--ball-b)';
+    const sp = splitAt!==undefined ? splitAt : n;
+    for(let i=0;i<n;i++) h+=`<i class="ball" style="background:${i<sp?cA:cB}"></i>`;
+    h+='</div>';
+    return h;
+  }
+  return `<span class="tri-num">${n}</span>`;
+}
+
+function triSVG() {
+  return `<svg class="tri-connector" viewBox="0 0 180 42" style="width:180px;height:42px"><line x1="90" y1="2" x2="28" y2="38" stroke="#9B78D0" stroke-width="2.5" stroke-linecap="round"/><line x1="90" y1="2" x2="152" y2="38" stroke="#9B78D0" stroke-width="2.5" stroke-linecap="round"/></svg>`;
+}
+
+function showConfetti() {
+  const l=document.getElementById('confettiLayer'),c=['#FFD600','#F2A135','#7853AB','#EF6C57','#E85D9A','#4DABF5','#14BF96','#FFF'],f=document.createDocumentFragment();
+  for(let i=0;i<40;i++){const e=document.createElement('div');e.className='confetti-piece';e.style.cssText=`left:${Math.random()*100}%;width:${6+Math.random()*8}px;height:${6+Math.random()*8}px;background:${c[ri(0,c.length-1)]};border-radius:${Math.random()>.5?'50%':'3px'};animation-duration:${1.1+Math.random()}s;animation-delay:${Math.random()*.3}s;--rot:${Math.random()*720}deg;--drift:${(Math.random()-.5)*150}px;`;f.appendChild(e);}
+  l.appendChild(f);setTimeout(()=>l.innerHTML='',3000);
+}
+function showStarsOn(el){const d=document.createElement('div');d.className='stars';d.innerHTML='<span class="star-item">★</span><span class="star-item">★</span><span class="star-item">★</span>';el.appendChild(d);setTimeout(()=>d.remove(),1200);}
+
+// ==================== MATH ====================
+let mMode,mA,mB,mOp,mAns,mBlank,mInput='',mWrong=0,mScore=0,mTotal=0,mLocked=false;
+function startMath(mode){retryMode=false;retryId=null;mMode=mode;mScore=0;mTotal=0;updM();showScreen('mathScreen');newMath();}
+function updM(){document.getElementById('mScoreNum').textContent=mScore;document.getElementById('mTotalNum').textContent=mTotal;}
+function newMath(){if(retryMode){retryDone();return;}mInput='';mWrong=0;mLocked=false;clearFB('mFeedback');mOp=Math.random()<.5?'+':'-';
+  if(difficulty==='easy'){if(mOp==='+'){mA=ri(0,10);mB=ri(0,10-mA)}else{mA=ri(0,10);mB=ri(0,mA)}}
+  else if(difficulty==='medium'){if(mOp==='+'){const s=ri(1,9),o=ri(10,Math.min(20-s,19));if(Math.random()<.5){mA=s;mB=o}else{mA=o;mB=s}}else{mA=ri(10,20);mB=ri(0,Math.min(9,mA))}}
+  else{if(mOp==='+'){mA=ri(10,19);mB=ri(1,20-mA)}else{mA=ri(10,20);mB=ri(1,mA)}}
+  mAns=mOp==='+'?mA+mB:mA-mB;mBlank=mMode==='basic'?'result':(Math.random()<.5?'a':'b');renderMath();renderMPad();}
+function mExp(){return mBlank==='result'?mAns:mBlank==='a'?mA:mB;}
+function renderMath(){const eq=document.getElementById('equation'),sym=mOp==='+'?'+':'−';
+  const bl=()=>{const c=['eq-blank'];if(mInput!=='')c.push('has-input');return`<span class="${c.join(' ')}" id="blankBox">${mInput||''}</span>`;};
+  const pA=mBlank==='a'?bl():`<span class="eq-part">${mA}</span>`,pB=mBlank==='b'?bl():`<span class="eq-part">${mB}</span>`,pR=mBlank==='result'?bl():`<span class="eq-part">${mAns}</span>`;
+  eq.innerHTML=`${pA}<span class="eq-op">${sym}</span>${pB}<span class="eq-equal">=</span>${pR}`;}
+function renderMPad(){const p=document.getElementById('mNumpad');let h='';
+  for(let i=1;i<=4;i++)h+=`<button class="num-btn" onclick="mPress(${i})">${i}</button>`;
+  for(let i=5;i<=8;i++)h+=`<button class="num-btn" onclick="mPress(${i})">${i}</button>`;
+  h+=`<button class="num-btn" onclick="mPress(9)">9</button><button class="num-btn" onclick="mPress(0)">0</button>`;
+  h+=`<button class="num-btn action-delete" onclick="mDel()">⌫</button>`;
+  if(mLocked)h+=`<button class="num-btn action-next" onclick="newMath()">→</button>`;
+  else h+=`<button class="num-btn action-confirm${mInput===''?' disabled':''}" onclick="mConfirm()">✓</button>`;
+  p.innerHTML=h;}
+function mPress(n){if(mLocked||mInput.length>=2)return;mInput+=n;renderMath();renderMPad();}
+function mDel(){if(mLocked)return;mInput=mInput.slice(0,-1);renderMath();renderMPad();}
+function mConfirm(){if(mLocked||mInput==='')return;const exp=mExp(),fb=document.getElementById('mFeedback'),bl=document.getElementById('blankBox'),area=document.getElementById('equationArea');
+  if(parseInt(mInput)===exp){if(retryMode)removeWrong(retryId);fb.innerHTML='正确 !';fb.className='feedback correct';bl.classList.add('correct-highlight');area.classList.add('anim-pop');setTimeout(()=>area.classList.remove('anim-pop'),400);mScore++;mTotal++;updM();mLocked=true;renderMPad();showConfetti();showStarsOn(area);setTimeout(()=>newMath(),1600);}
+  else{mWrong++;area.classList.add('anim-shake');bl.classList.add('wrong-highlight');setTimeout(()=>{area.classList.remove('anim-shake');if(bl)bl.classList.remove('wrong-highlight');},450);
+    if(mWrong>=3){if(!retryMode)addWrong({id:Date.now(),mode:'math',subMode:mMode,a:mA,b:mB,op:mOp,blank:mBlank,answer:exp,difficulty,ts:Date.now()});mTotal++;updM();fb.innerHTML=`答案是 <strong>${exp}</strong>`;fb.className='feedback answer';mInput=String(exp);renderMath();const b2=document.getElementById('blankBox');if(b2)b2.classList.add('correct-highlight');mLocked=true;renderMPad();setTimeout(()=>newMath(),2400);}
+    else{fb.textContent=`再试一次 (${mWrong}/3)`;fb.className='feedback wrong';mInput='';renderMath();renderMPad();}}}
+
+// ==================== PATTERN ====================
+const SHAPES=[
+  {id:'tri',html:`<svg viewBox="0 0 40 40"><polygon points="20,5 37,35 3,35" fill="#FF8FAB" stroke="#E8799A" stroke-width="1.5" stroke-linejoin="round"/></svg>`},
+  {id:'sq',html:`<svg viewBox="0 0 40 40"><rect x="5" y="5" width="30" height="30" rx="4" fill="#8BC7F7" stroke="#74B3E3" stroke-width="1.5"/></svg>`},
+  {id:'star',html:`<svg viewBox="0 0 40 40"><polygon points="20,3 24.5,15 37,16.5 28,25.5 30.5,37 20,31 9.5,37 12,25.5 3,16.5 15.5,15" fill="#FFD93D" stroke="#E8C235" stroke-width="1.5" stroke-linejoin="round"/></svg>`},
+  {id:'hex',html:`<svg viewBox="0 0 40 40"><polygon points="20,3 35,11.5 35,28.5 20,37 5,28.5 5,11.5" fill="#C4A0F5" stroke="#AB87DC" stroke-width="1.5" stroke-linejoin="round"/></svg>`},
+  {id:'cir',html:`<svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="16" fill="#90E8C8" stroke="#7BD4B4" stroke-width="1.5"/></svg>`},
+  {id:'dia',html:`<svg viewBox="0 0 40 40"><polygon points="20,4 36,20 20,36 4,20" fill="#FFB088" stroke="#E89A72" stroke-width="1.5" stroke-linejoin="round"/></svg>`},
+];
+const ANIMALS=[{id:'cat',html:'🐱'},{id:'dog',html:'🐶'},{id:'rab',html:'🐰'},{id:'bear',html:'🐻'},{id:'frog',html:'🐸'},{id:'bird',html:'🐦'},{id:'fish',html:'🐟'},{id:'butt',html:'🦋'}];
+const OBJECTS=[{id:'apple',html:'🍎'},{id:'flower',html:'🌸'},{id:'ball',html:'⚽'},{id:'book',html:'📖'},{id:'pen',html:'✏️'},{id:'bell',html:'🔔'},{id:'umbr',html:'☂️'},{id:'balln',html:'🎈'}];
+const ALL_POOLS=[SHAPES,ANIMALS,OBJECTS];
+let pPat=[],pBlanks=[],pFilled={},pCur=0,pWrong=0,pScore=0,pTotal=0,pLocked=false,pPool=[],pCachedOpts=[];
+
+function startPattern(){retryMode=false;retryId=null;pScore=0;pTotal=0;updP();showScreen('patternScreen');newPat();}
+function updP(){document.getElementById('pScoreNum').textContent=pScore;document.getElementById('pTotalNum').textContent=pTotal;}
+function newPat(){if(retryMode){retryDone();return;}pFilled={};pCur=0;pWrong=0;pLocked=false;clearFB('pFeedback');
+  pPool=ALL_POOLS[ri(0,ALL_POOLS.length-1)];const pl=ri(2,3),pc=shuffle([...pPool]).slice(0,pl);
+  pPat=[];for(let i=0;i<8;i++)pPat.push(pc[i%pl]);
+  if(difficulty==='easy')pBlanks=[7];
+  else if(difficulty==='medium'){const n=ri(2,3);pBlanks=[];for(let i=8-n;i<8;i++)pBlanks.push(i);}
+  else{const n=ri(2,3),c=[1,2,3,4,5,6,7];shuffle(c);pBlanks=c.slice(0,n).sort((a,b)=>a-b);}
+  /* Build all 4 options once: include all unique correct answers + distractors */
+  const correctSet=new Set(pBlanks.map(i=>pPat[i].id));
+  const correctItems=pBlanks.map(i=>pPat[i]).filter((v,i,a)=>a.findIndex(x=>x.id===v.id)===i);
+  const distractors=pPool.filter(it=>!correctSet.has(it.id));shuffle(distractors);
+  const need=4-correctItems.length;
+  pCachedOpts=shuffle([...correctItems,...distractors.slice(0,need)]);
+  renderPat();renderPOpts();}
+function renderPat(){const g=document.getElementById('patternGrid');let h='';
+  for(let i=0;i<8;i++){const isB=pBlanks.includes(i),isF=pFilled[i]!==undefined,isA=!pLocked&&isB&&!isF&&pBlanks[pCur]===i;
+    if(isB&&!isF)h+=`<div class="p-cell blank${isA?' active':''}"><span class="blank-q">?</span></div>`;
+    else if(isF)h+=`<div class="p-cell filled-correct">${pFilled[i].html}</div>`;
+    else h+=`<div class="p-cell">${pPat[i].html}</div>`;}
+  g.innerHTML=h;}
+function renderPOpts(){const o=document.getElementById('patternOpts');if(pLocked||pCur>=pBlanks.length){o.innerHTML='';return;}
+  let h='';pCachedOpts.forEach((it,i)=>h+=`<button class="p-opt" onclick="pPick('${it.id}',${i})">${it.html}</button>`);o.innerHTML=h;}
+function pPick(id,oi){if(pLocked)return;const bi=pBlanks[pCur],cor=pPat[bi],fb=document.getElementById('pFeedback'),area=document.getElementById('patternArea');
+  if(id===cor.id){pFilled[bi]=cor;pCur++;
+    if(pCur>=pBlanks.length){if(retryMode)removeWrong(retryId);fb.innerHTML='正确 !';fb.className='feedback correct';pScore++;pTotal++;updP();pLocked=true;renderPat();renderPOpts();area.classList.add('anim-pop');setTimeout(()=>area.classList.remove('anim-pop'),400);showConfetti();showStarsOn(area);setTimeout(()=>newPat(),1800);}
+    else{clearFB('pFeedback');renderPat();renderPOpts();}}
+  else{pWrong++;area.classList.add('anim-shake');setTimeout(()=>area.classList.remove('anim-shake'),450);
+    if(pWrong>=3){if(!retryMode)addWrong({id:Date.now(),mode:'pattern',poolIdx:ALL_POOLS.indexOf(pPool),patIds:pPat.map(p=>p.id),blanks:[...pBlanks],answer:'',difficulty,ts:Date.now()});pTotal++;updP();for(let i=pCur;i<pBlanks.length;i++)pFilled[pBlanks[i]]=pPat[pBlanks[i]];fb.innerHTML='看看正确答案';fb.className='feedback answer';pLocked=true;renderPat();renderPOpts();setTimeout(()=>newPat(),2600);}
+    else{fb.textContent=`再试一次 (${pWrong}/3)`;fb.className='feedback wrong';const bs=document.querySelectorAll('.p-opt');if(bs[oi])bs[oi].classList.add('disabled');}}}
+
+// ==================== DECOMP EXPLORE ====================
+let expNum=0,expIdx=0,expSplits=[];
+
+function startExplore(){showScreen('exploreScreen');
+  const sel=document.getElementById('numSelect'),mx=maxNum();let h='';
+  for(let i=1;i<=mx;i++)h+=`<button class="ns-btn" onclick="expSelect(${i},this)">${i}</button>`;
+  sel.innerHTML=h;
+  document.getElementById('exploreTri').style.display='none';
+  document.getElementById('exploreNav').style.display='none';}
+
+function expSelect(n,el){
+  document.querySelectorAll('.ns-btn').forEach(b=>b.classList.remove('ns-active'));
+  el.classList.add('ns-active');
+  expNum=n;expSplits=[];
+  for(let i=0;i<=n;i++)expSplits.push([i,n-i]);
+  expIdx=0;renderExpTri();
+  document.getElementById('exploreTri').style.display='flex';
+  document.getElementById('exploreNav').style.display='flex';}
+
+function renderExpTri(){
+  const w=document.getElementById('exploreTri');
+  const s=expSplits[expIdx],left=s[0],right=s[1];
+  const dt=displayType;
+  w.innerHTML=`<div class="tri">
+    <div class="tri-cell">${renderNumVal(expNum, dt, 'var(--ball-a)', 'var(--ball-b)', left)}</div>
+    ${triSVG()}
+    <div class="tri-bottom">
+      <div class="tri-cell">${renderNumVal(left, dt, 'var(--ball-a)', 'var(--ball-a)')}</div>
+      <div class="tri-plus">+</div>
+      <div class="tri-cell">${renderNumVal(right, dt, 'var(--ball-b)', 'var(--ball-b)')}</div>
+    </div></div>`;
+  document.getElementById('expLabel').textContent=`${expIdx+1} / ${expSplits.length}`;}
+
+function expPrev(){if(expIdx>0){expIdx--;renderExpTri();}}
+function expNext(){if(expIdx<expSplits.length-1){expIdx++;renderExpTri();}}
+
+// ==================== DECOMP GAME ====================
+let dMode='',dNum=0,dLeft=0,dRight=0,dHide='',dInput='',dWrong=0,dScore=0,dTotal=0,dLocked=false;
+
+function startDecomp(mode){retryMode=false;retryId=null;dMode=mode;dScore=0;dTotal=0;updD();showScreen('decompGame');newDecomp();}
+function updD(){document.getElementById('dScoreNum').textContent=dScore;document.getElementById('dTotalNum').textContent=dTotal;}
+
+function newDecomp(){if(retryMode){retryDone();return;}dInput='';dWrong=0;dLocked=false;clearFB('dFeedback');
+  const mx=maxNum();dNum=ri(1,mx);dLeft=ri(0,dNum);dRight=dNum-dLeft;
+  if(dMode==='guessPart')dHide=Math.random()<.5?'left':'right';
+  else dHide='top';
+  renderDTri();renderDPad();}
+
+function dExpected(){return dHide==='left'?dLeft:dHide==='right'?dRight:dNum;}
+
+function renderDTri(){
+  const w=document.getElementById('decompTri');
+  const dt=displayType;
+  const topBlank=dHide==='top', leftBlank=dHide==='left', rightBlank=dHide==='right';
+
+  function cell(val, isBlank) {
+    if(isBlank){
+      const cls=['tri-cell','blank'];if(dInput!=='')cls.push('has-input');
+      return`<div class="${cls.join(' ')}" id="dBlank">${dInput?`<span class="tri-num">${dInput}</span>`:'<span class="tri-num" style="color:var(--purple-light)">?</span>'}</div>`;
+    }
+    return`<div class="tri-cell">${renderNumVal(val, dt, 'var(--ball-a)', 'var(--ball-b)', topBlank?undefined:dLeft)}</div>`;
+  }
+
+  w.innerHTML=`<div class="tri">
+    ${cell(dNum, topBlank)}
+    ${triSVG()}
+    <div class="tri-bottom">
+      ${cell(dLeft, leftBlank)}
+      <div class="tri-plus">+</div>
+      ${cell(dRight, rightBlank)}
+    </div></div>`;}
+
+function renderDPad(){const p=document.getElementById('dNumpad');let h='';
+  for(let i=1;i<=4;i++)h+=`<button class="num-btn" onclick="dPress(${i})">${i}</button>`;
+  for(let i=5;i<=8;i++)h+=`<button class="num-btn" onclick="dPress(${i})">${i}</button>`;
+  h+=`<button class="num-btn" onclick="dPress(9)">9</button><button class="num-btn" onclick="dPress(0)">0</button>`;
+  h+=`<button class="num-btn action-delete" onclick="dDel()">⌫</button>`;
+  if(dLocked)h+=`<button class="num-btn action-next" onclick="newDecomp()">→</button>`;
+  else h+=`<button class="num-btn action-confirm${dInput===''?' disabled':''}" onclick="dConfirm()">✓</button>`;
+  p.innerHTML=h;}
+
+function dPress(n){if(dLocked||dInput.length>=2)return;dInput+=n;renderDTri();renderDPad();}
+function dDel(){if(dLocked)return;dInput=dInput.slice(0,-1);renderDTri();renderDPad();}
+
+function dConfirm(){if(dLocked||dInput==='')return;const exp=dExpected(),fb=document.getElementById('dFeedback'),bl=document.getElementById('dBlank'),area=document.getElementById('decompTri');
+  if(parseInt(dInput)===exp){if(retryMode)removeWrong(retryId);fb.innerHTML='正确 !';fb.className='feedback correct';bl.classList.add('correct-highlight');area.classList.add('anim-pop');setTimeout(()=>area.classList.remove('anim-pop'),400);dScore++;dTotal++;updD();dLocked=true;renderDPad();showConfetti();showStarsOn(area);setTimeout(()=>newDecomp(),1600);}
+  else{dWrong++;area.classList.add('anim-shake');bl.classList.add('wrong-highlight');setTimeout(()=>{area.classList.remove('anim-shake');if(bl)bl.classList.remove('wrong-highlight');},450);
+    if(dWrong>=3){if(!retryMode)addWrong({id:Date.now(),mode:'decomp',subMode:dMode,num:dNum,left:dLeft,right:dRight,hide:dHide,answer:dExpected(),difficulty,ts:Date.now()});dTotal++;updD();fb.innerHTML=`答案是 <strong>${exp}</strong>`;fb.className='feedback answer';dInput=String(exp);renderDTri();const b2=document.getElementById('dBlank');if(b2)b2.classList.add('correct-highlight');dLocked=true;renderDPad();setTimeout(()=>newDecomp(),2400);}
+    else{fb.textContent=`再试一次 (${dWrong}/3)`;fb.className='feedback wrong';dInput='';renderDTri();renderDPad();}}}
+
+// ==================== WRONG ANSWERS ====================
+let retryMode=false, retryId=null;
+function getWrongList(){try{return JSON.parse(localStorage.getItem('qiqi_wrong')||'[]')}catch(e){return[];}}
+function saveWrongList(list){localStorage.setItem('qiqi_wrong',JSON.stringify(list));}
+function addWrong(item){const list=getWrongList();list.unshift(item);if(list.length>200)list.length=200;saveWrongList(list);updWrongBadge();}
+function removeWrong(id){const list=getWrongList().filter(w=>w.id!==id);saveWrongList(list);updWrongBadge();}
+function updWrongBadge(){const n=getWrongList().length;const b=document.getElementById('wrongBadge');if(b)b.textContent=n>0?n:'';}
+function retryDone(){retryMode=false;retryId=null;showWrongList();}
+
+function describeWrong(w){
+  if(w.mode==='math'){const sym=w.op==='+'?'+':'−';const ans=w.op==='+'?w.a+w.b:w.a-w.b;
+    if(w.blank==='result')return w.a+' '+sym+' '+w.b+' = ?';
+    if(w.blank==='a')return '? '+sym+' '+w.b+' = '+ans;
+    return w.a+' '+sym+' ? = '+ans;}
+  if(w.mode==='decomp'){if(w.hide==='left')return w.num+' → ? + '+w.right;
+    if(w.hide==='right')return w.num+' → '+w.left+' + ?';
+    return '? → '+w.left+' + '+w.right;}
+  return '找规律';}
+function diffLabel(d){return d==='easy'?'简单':d==='medium'?'中等':'困难';}
+
+function showWrongList(){
+  showScreen('wrongScreen');updWrongBadge();
+  const list=getWrongList(),el=document.getElementById('wrongList'),cnt=document.getElementById('wrongCount');
+  cnt.textContent=list.length>0?'共 '+list.length+' 题':'';
+  if(list.length===0){el.innerHTML='<div class="wrong-empty">太棒了，没有错题！</div>';return;}
+  let h='';
+  list.forEach(w=>{h+=`<div class="wrong-item"><div class="wrong-info"><div class="wrong-q">${describeWrong(w)}</div><div class="wrong-meta">${diffLabel(w.difficulty)}${w.answer!==''&&w.answer!==undefined?' · 答案: '+w.answer:''}</div></div><button class="wrong-retry" onclick="retryWrong(${w.id})">重做</button></div>`;});
+  h+='<button class="wrong-clear" onclick="clearWrong()">清空错题本</button>';
+  el.innerHTML=h;}
+
+function clearWrong(){saveWrongList([]);showWrongList();}
+
+function retryWrong(id){
+  const list=getWrongList(),w=list.find(x=>x.id===id);
+  if(!w)return;retryMode=true;retryId=id;
+  if(w.mode==='math'){
+    mMode=w.subMode;mScore=0;mTotal=0;updM();mA=w.a;mB=w.b;mOp=w.op;
+    mAns=w.op==='+'?w.a+w.b:w.a-w.b;mBlank=w.blank;
+    mInput='';mWrong=0;mLocked=false;clearFB('mFeedback');renderMath();renderMPad();showScreen('mathScreen');
+  }else if(w.mode==='decomp'){
+    dMode=w.subMode;dScore=0;dTotal=0;updD();dNum=w.num;dLeft=w.left;dRight=w.right;dHide=w.hide;
+    dInput='';dWrong=0;dLocked=false;clearFB('dFeedback');renderDTri();renderDPad();showScreen('decompGame');
+  }else if(w.mode==='pattern'){
+    const pool=ALL_POOLS[w.poolIdx];if(!pool){retryMode=false;return;}
+    pPat=w.patIds.map(pid=>pool.find(x=>x.id===pid)||SHAPES[0]);pBlanks=w.blanks;pPool=pool;
+    pFilled={};pCur=0;pWrong=0;pLocked=false;pScore=0;pTotal=0;updP();clearFB('pFeedback');
+    const correctSet=new Set(pBlanks.map(i=>pPat[i].id));
+    const correctItems=pBlanks.map(i=>pPat[i]).filter((v,i,a)=>a.findIndex(x=>x.id===v.id)===i);
+    const distractors=pPool.filter(it=>!correctSet.has(it.id));shuffle(distractors);
+    pCachedOpts=shuffle([...correctItems,...distractors.slice(0,4-correctItems.length)]);
+    renderPat();renderPOpts();showScreen('patternScreen');
+  }}
+
+// ==================== KEYBOARD ====================
+document.addEventListener('keydown',e=>{
+  if(document.getElementById('mathScreen').classList.contains('active')){if(e.key>='0'&&e.key<='9')mPress(+e.key);else if(e.key==='Backspace')mDel();else if(e.key==='Enter')mLocked?newMath():mConfirm();}
+  if(document.getElementById('decompGame').classList.contains('active')){if(e.key>='0'&&e.key<='9')dPress(+e.key);else if(e.key==='Backspace')dDel();else if(e.key==='Enter')dLocked?newDecomp():dConfirm();}
+  if(document.getElementById('exploreScreen').classList.contains('active')){if(e.key==='ArrowLeft')expPrev();else if(e.key==='ArrowRight')expNext();}
+});
+updWrongBadge();
+if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js');}
+</script>
+</body>
+</html>
