@@ -144,6 +144,7 @@
 
   /* Explore: number selector */
   .num-select{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;width:100%;margin-bottom:16px}
+  .num-select-scroll{max-height:55vh;overflow-y:auto;-webkit-overflow-scrolling:touch;border-radius:12px;padding:4px}
   .ns-btn{aspect-ratio:1;border:none;border-radius:14px;font-size:22px;font-weight:800;font-family:inherit;cursor:pointer;background:rgba(255,255,255,.15);color:var(--white);transition:all .15s;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 0 rgba(0,0,0,.08)}
   .ns-btn:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.05)}
   .ns-btn.ns-active{background:var(--white);color:var(--teal-dark);box-shadow:0 3px 0 rgba(0,0,0,.1)}
@@ -223,8 +224,15 @@
     </div>
 
     <button class="mode-card c-sky" onclick="startExplore()"><div class="mode-dot">⤵</div><div><div class="mode-label">分一分</div><div class="mode-desc">选一个数，看它怎么拆开</div></div></button>
-    <button class="mode-card c-purple" onclick="startDecomp('guessPart')"><div class="mode-dot">?</div><div><div class="mode-label">猜部分</div><div class="mode-desc">已知总数和一部分，猜另一个</div></div></button>
+    <button class="mode-card c-purple" onclick="showGuessPartSelect()"><div class="mode-dot">?</div><div><div class="mode-label">猜部分</div><div class="mode-desc">已知总数和一部分，猜另一个</div></div></button>
     <button class="mode-card c-orange" onclick="startDecomp('guessSum')"><div class="mode-dot">+</div><div><div class="mode-label">猜总数</div><div class="mode-desc">已知两部分，猜合起来是多少</div></div></button>
+  </div>
+
+  <!-- ========== GUESS PART SELECT ========== -->
+  <div class="screen" id="guessPartSelect">
+    <div class="top-bar"><button class="back-btn" onclick="showScreen('decompMenu')">← 返回</button></div>
+    <div class="section-label" style="margin-bottom:10px">选 择 总 数</div>
+    <div class="num-select num-select-scroll" id="gpNumSelect"></div>
   </div>
 
   <!-- ========== DECOMP EXPLORE ========== -->
@@ -242,7 +250,7 @@
   <!-- ========== DECOMP GAME ========== -->
   <div class="screen" id="decompGame">
     <div class="top-bar">
-      <button class="back-btn" onclick="showScreen('decompMenu')">← 返回</button>
+      <button class="back-btn" onclick="dGoBack()">← 返回</button>
       <div class="score-badge"><span class="badge-score" id="dScoreNum">0</span><span class="badge-sep">/</span><span class="badge-total" id="dTotalNum">0</span></div>
     </div>
     <div class="tri-wrap" id="decompTri"></div>
@@ -335,9 +343,9 @@ let mMode,mA,mB,mOp,mAns,mBlank,mInput='',mWrong=0,mScore=0,mTotal=0,mLocked=fal
 function startMath(mode){retryMode=false;retryId=null;mMode=mode;mScore=0;mTotal=0;updM();showScreen('mathScreen');newMath();}
 function updM(){document.getElementById('mScoreNum').textContent=mScore;document.getElementById('mTotalNum').textContent=mTotal;}
 function newMath(){if(retryMode){retryDone();return;}mInput='';mWrong=0;mLocked=false;clearFB('mFeedback');mOp=Math.random()<.5?'+':'-';
-  if(difficulty==='easy'){if(mOp==='+'){mA=ri(0,10);mB=ri(0,10-mA)}else{mA=ri(0,10);mB=ri(0,mA)}}
-  else if(difficulty==='medium'){if(mOp==='+'){const s=ri(1,9),o=ri(10,Math.min(20-s,19));if(Math.random()<.5){mA=s;mB=o}else{mA=o;mB=s}}else{mA=ri(10,20);mB=ri(0,Math.min(9,mA))}}
-  else{if(mOp==='+'){mA=ri(10,19);mB=ri(1,20-mA)}else{mA=ri(10,20);mB=ri(1,mA)}}
+  if(difficulty==='easy'){if(mOp==='+'){mA=ri(1,9);mB=ri(1,10-mA)}else{mA=ri(2,10);mB=ri(1,mA-1)}}
+  else if(difficulty==='medium'){if(mOp==='+'){const s=ri(1,9),o=ri(10,Math.min(20-s,19));if(Math.random()<.5){mA=s;mB=o}else{mA=o;mB=s}}else{mA=ri(10,20);mB=ri(1,Math.min(9,mA-1))}}
+  else{if(mOp==='+'){mA=ri(10,19);mB=ri(1,20-mA)}else{mA=ri(10,20);mB=ri(1,mA-1)}}
   mAns=mOp==='+'?mA+mB:mA-mB;mBlank=mMode==='basic'?'result':(Math.random()<.5?'a':'b');renderMath();renderMPad();}
 function mExp(){return mBlank==='result'?mAns:mBlank==='a'?mA:mB;}
 function renderMath(){const eq=document.getElementById('equation'),sym=mOp==='+'?'+':'−';
@@ -410,7 +418,7 @@ let expNum=0,expIdx=0,expSplits=[];
 
 function startExplore(){showScreen('exploreScreen');
   const sel=document.getElementById('numSelect'),mx=maxNum();let h='';
-  for(let i=1;i<=mx;i++)h+=`<button class="ns-btn" onclick="expSelect(${i},this)">${i}</button>`;
+  for(let i=2;i<=mx;i++)h+=`<button class="ns-btn" onclick="expSelect(${i},this)">${i}</button>`;
   sel.innerHTML=h;
   document.getElementById('exploreTri').style.display='none';
   document.getElementById('exploreNav').style.display='none';}
@@ -419,7 +427,7 @@ function expSelect(n,el){
   document.querySelectorAll('.ns-btn').forEach(b=>b.classList.remove('ns-active'));
   el.classList.add('ns-active');
   expNum=n;expSplits=[];
-  for(let i=0;i<=n;i++)expSplits.push([i,n-i]);
+  for(let i=1;i<n;i++)expSplits.push([i,n-i]);
   expIdx=0;renderExpTri();
   document.getElementById('exploreTri').style.display='flex';
   document.getElementById('exploreNav').style.display='flex';}
@@ -442,13 +450,18 @@ function expPrev(){if(expIdx>0){expIdx--;renderExpTri();}}
 function expNext(){if(expIdx<expSplits.length-1){expIdx++;renderExpTri();}}
 
 // ==================== DECOMP GAME ====================
-let dMode='',dNum=0,dLeft=0,dRight=0,dHide='',dInput='',dWrong=0,dScore=0,dTotal=0,dLocked=false;
+let dMode='',dNum=0,dLeft=0,dRight=0,dHide='',dInput='',dWrong=0,dScore=0,dTotal=0,dLocked=false,gpFixedNum=0;
+
+function showGuessPartSelect(){showScreen('guessPartSelect');const sel=document.getElementById('gpNumSelect');let h='',lo,hi;if(difficulty==='easy'){lo=2;hi=10}else if(difficulty==='medium'){lo=11;hi=20}else{lo=21;hi=99}for(let i=lo;i<=hi;i++)h+=`<button class="ns-btn" onclick="gpSelect(${i})">${i}</button>`;sel.innerHTML=h;}
+function gpSelect(n){gpFixedNum=n;startDecomp('guessPart');}
+function dGoBack(){if(dMode==='guessPart')showGuessPartSelect();else showScreen('decompMenu');}
 
 function startDecomp(mode){retryMode=false;retryId=null;dMode=mode;dScore=0;dTotal=0;updD();showScreen('decompGame');newDecomp();}
 function updD(){document.getElementById('dScoreNum').textContent=dScore;document.getElementById('dTotalNum').textContent=dTotal;}
 
 function newDecomp(){if(retryMode){retryDone();return;}dInput='';dWrong=0;dLocked=false;clearFB('dFeedback');
-  const mx=maxNum();dNum=ri(1,mx);dLeft=ri(0,dNum);dRight=dNum-dLeft;
+  if(dMode==='guessPart'){dNum=gpFixedNum}else{const mx=maxNum();dNum=ri(2,mx)}
+  dLeft=ri(1,dNum-1);dRight=dNum-dLeft;
   if(dMode==='guessPart')dHide=Math.random()<.5?'left':'right';
   else dHide='top';
   renderDTri();renderDPad();}
